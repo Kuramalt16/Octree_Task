@@ -1,3 +1,4 @@
+import numpy as np
 
 
 class OctreeNode:
@@ -7,6 +8,12 @@ class OctreeNode:
         self.children = [None] * 8
         self.points = []  # list of leaves
 
+    def is_point_within_sphere(self, point):
+        point = np.array(point)
+        distance = np.linalg.norm(point - self.center)
+
+        return distance <= self.size / 2
+
 class Octree:
     def __init__(self, center, size):
         self.root = OctreeNode(center, size)
@@ -15,7 +22,11 @@ class Octree:
         self.new_node_calc(self.root, point)
 
     def new_node_calc(self, node, point):
-        # Check if node is divisible, aka bigger than 1. if it's not then it's a leaf
+        # check if the node is in the sphere
+        if not node.is_point_within_sphere(point):
+            return
+
+        # Check if node is divisible, aka bigger than a pre-set threshold (1). if it's not then it's a leaf
         if node.size <= 1:
             node.points.append(point)
             return
